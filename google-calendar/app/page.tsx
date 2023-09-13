@@ -1,32 +1,284 @@
 'use client'
 
-import React from 'react'
-import AppBar from '@mui/material/AppBar'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
+
+import { Calendar, dayjsLocalizer, Event } from 'react-big-calendar'
+import { IconButton } from '@mui/material'
+import dayjs, { Dayjs } from 'dayjs'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from '@mui/material'
+import React, { useState } from 'react'
 import Box from '@mui/material/Box'
-import ToolBar from '@mui/material/Toolbar'
-import IconButton from '@mui/material/IconButton'
-import MenuIcon from '@mui/icons-material/Menu'
-import { Button, Typography } from '@mui/material'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faBars,
+  faAngleRight,
+  faAngleLeft,
+  faMagnifyingGlass,
+  faCircleQuestion,
+  faCaretDown,
+  faGear,
+  faPlus,
+  faCheck,
+} from '@fortawesome/free-solid-svg-icons'
+
+const localizer = dayjsLocalizer(dayjs)
+const event = [
+  {
+    id: 1,
+    title: 'Meeting',
+    start: dayjs().hour(10).minute(0).toDate(),
+    end: dayjs().hour(12).minute(0).toDate(),
+  },
+]
 
 export default function Home() {
+  const calendarOptions = {
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: 'dayGridMonth',
+    events: [
+      {
+        title: 'Event 1',
+        start: '2023-09-13',
+        end: '2023-09-13',
+      },
+      {
+        title: 'Event 2',
+        start: '2023-09-14',
+        end: '2023-09-14',
+      },
+    ],
+    headerToolbar: false,
+  }
+
+  const [value, setValue] = useState<Dayjs | null>(dayjs())
+
+  const tableStyle: React.CSSProperties = {
+    borderCollapse: 'collapse',
+    width: '100%',
+    border: 'hidden',
+  }
+
+  const cellStyle: React.CSSProperties = {
+    border: '1px solid #000',
+    padding: '8px',
+    textAlign: 'left',
+    position: 'relative',
+    height: '30px',
+  }
+  const labelCellStyle: React.CSSProperties = {
+    borderRight: '1px solid #000',
+    position: 'relative',
+    width: '20%',
+    height: '30px',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    position: 'absolute',
+    transform: 'translateY(-150%)',
+    right: '20%',
+    width: '10px',
+  }
+
+  const handleDayClick = (date: Dayjs | null) => {
+    // setValue(date)
+    // Handle the click event for a selected day here
+    console.log('Selected date:', date?.format('YYYY-MM-DD'))
+  }
+
   return (
     <>
-      <Box
-        sx={{
-          bgcolor: 'inherit',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        <IconButton sx={{ ml: 1, color: 'black' }}>
-          <MenuIcon />
-        </IconButton>
-        <Typography variant='body1' sx={{ fontSize: 20, ml: 3, pb: 0, mb: 0 }}>
-          Calendar
-        </Typography>
-        <button className='rounded-border'>Today</button>
-      </Box>
+      <div style={{ display: 'flex', alignItems: 'center', flexFlow: 'row' }}>
+        <FontAwesomeIcon icon={faBars} />
+        <h2 className='normal'>Calendar</h2>
+        <button className='rounded'>Today</button>
+        <FontAwesomeIcon icon={faAngleLeft} />
+        <FontAwesomeIcon icon={faAngleRight} />
+        <h2 className='normal'>Today's Date</h2>
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+        <div className='drpdn-btn'>
+          <FontAwesomeIcon className='help-btn' icon={faCircleQuestion} />
+          <div className='tooltip help- rounded'>
+            <h3>Support</h3>
+          </div>
+          <div className='drpdn-menu rounded help-menu'>
+            <ul>
+              <li>
+                <a href='#'>Help</a>
+              </li>
+              <li>
+                <a href='#'>Training</a>
+              </li>
+              <li>
+                <a href='#'>Updates</a>
+              </li>
+              <li>
+                <a href='#'>Send feedback to Google</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className='drpdn-btn'>
+          <FontAwesomeIcon className='settings-btn' icon={faGear} />
+          <div className='tooltip settings-tip'>Settings menu</div>
+          <div className='drpdn-menu rounded settings-menu'>
+            <ul>
+              <li>
+                <a href='#'>Settings</a>
+              </li>
+              <li>
+                <a href='#'>Trash</a>
+              </li>
+              <li>
+                <a href='#'>Density and color</a>
+              </li>
+              <li>
+                <a href='#'>Print</a>
+              </li>
+              <li>
+                <a href='#'>Get add-ons</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className='drpdn-btn'>
+          <button className='rounded view-btn'>
+            Day
+            <FontAwesomeIcon icon={faCaretDown} />
+          </button>
+          <div className='drpdn-menu rounded view-menu'>
+            <ul>
+              <li>
+                <div>
+                  <h5 className='float-left'>Day</h5>
+                  <h5 className='float-right'>D</h5>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h5 className='float-left'>Week</h5>
+                  <h5 className='float-right'>W</h5>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h5 className='float-left'>Month</h5>
+                  <h5 className='float-right'>M</h5>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h5 className='float-left'>Year</h5>
+                  <h5 className='float-right'>Y</h5>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h5 className='float-left'>Schedule</h5>
+                  <h5 className='float-right'>A</h5>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h5 className='float-left'>4days</h5>
+                  <h5 className='float-right'>X</h5>
+                </div>
+              </li>
+              <li>
+                <FontAwesomeIcon icon={faCheck} />
+                <h5>Show weekends</h5>
+              </li>
+              <li>
+                <FontAwesomeIcon icon={faCheck} />
+                <h5>Show declined events</h5>
+              </li>
+              <li>
+                <FontAwesomeIcon icon={faCheck} />
+                <h5>Show completed tasks</h5>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <aside>
+        <div className='drpdn-btn'>
+          <button className='create-btn'>
+            <FontAwesomeIcon icon={faPlus} />
+            Create
+            <FontAwesomeIcon icon={faCaretDown} />
+          </button>
+          <div className='drpdn-menu rounded create-menu'>
+            <ul>
+              <li>Event</li>
+              <li>Task</li>
+              <li>Appointment schedule</li>
+            </ul>
+          </div>
+        </div>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
+            value={value} // Convert Dayjs to Date
+            onChange={(date) => handleDayClick(date ? dayjs(date) : null)} // Convert Date to Dayjs
+            showDaysOutsideCurrentMonth={true}
+            fixedWeekNumber={6}
+          />
+        </LocalizationProvider>
+      </aside>
+      <article>
+        {/* <table style={tableStyle}>
+          <tr>
+            <th scope='row' style={labelCellStyle}>
+              <div style={labelStyle}></div>
+            </th>
+            <td style={cellStyle}></td>
+          </tr>
+          <tr>
+            <th scope='row' style={labelCellStyle}>
+              <div style={labelStyle}>12:00</div>
+            </th>
+            <td style={cellStyle}></td>
+          </tr>
+          <tr>
+            <th scope='row' style={labelCellStyle}>
+              <div style={labelStyle}>1AM</div>
+            </th>
+            <td style={cellStyle}></td>
+          </tr>
+          <tr>
+            <th scope='row' style={labelCellStyle}>
+              <div style={labelStyle}>2AM</div>
+            </th>
+            <td style={cellStyle}></td>
+          </tr>
+          <tr>
+            <th scope='row' style={labelCellStyle}>
+              <div style={labelStyle}>3AM</div>
+            </th>
+            <td style={cellStyle}></td>
+          </tr>
+        </table> */}
+        {/* <Calendar
+          localizer={localizer}
+          events={event}
+          startAccessor='start'
+          endAccessor='end'
+          style={{ height: 200 }}
+        /> */}
+        <FullCalendar {...calendarOptions} />
+      </article>
     </>
   )
 }
