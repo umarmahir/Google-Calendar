@@ -2,6 +2,7 @@
 
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
 import { Calendar, dayjsLocalizer, Event } from 'react-big-calendar'
@@ -20,7 +21,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import Box from '@mui/material/Box'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -46,9 +47,16 @@ const event = [
 ]
 
 export default function Home() {
+  const calendarRef = useRef<FullCalendar | null>(null)
+  const changeView = (newView: string) => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().changeView(newView) // Use the changeView method
+    }
+  }
+
   const calendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
+    plugins: [timeGridPlugin, interactionPlugin, dayGridPlugin],
+    initialView: 'timeGridWeek',
     events: [
       {
         title: 'Event 1',
@@ -61,37 +69,22 @@ export default function Home() {
         end: '2023-09-14',
       },
     ],
-    headerToolbar: false,
+    headerToolbar: {},
+    // dayGridWeek: {
+    //   // Customize the hourly grid for dayGridWeek view
+    //   slotDuration: '00:30:00', // Display slots every 30 minutes
+    //   slotLabelInterval: '01:00:00', // Display hour labels every 1 hour
+    // },
+    // dayGridDay: {
+    //   // Customize the hourly grid for dayGridDay view
+      // slotDuration: '00:30:00', // Display slots every 30 minutes
+      // slotLabelInterval: '01:00:00', // Display hour labels every 1 hour
+    },
   }
 
   const [value, setValue] = useState<Dayjs | null>(dayjs())
 
-  const tableStyle: React.CSSProperties = {
-    borderCollapse: 'collapse',
-    width: '100%',
-    border: 'hidden',
-  }
-
-  const cellStyle: React.CSSProperties = {
-    border: '1px solid #000',
-    padding: '8px',
-    textAlign: 'left',
-    position: 'relative',
-    height: '30px',
-  }
-  const labelCellStyle: React.CSSProperties = {
-    borderRight: '1px solid #000',
-    position: 'relative',
-    width: '20%',
-    height: '30px',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    position: 'absolute',
-    transform: 'translateY(-150%)',
-    right: '20%',
-    width: '10px',
-  }
+  
 
   const handleDayClick = (date: Dayjs | null) => {
     // setValue(date)
@@ -238,47 +231,20 @@ export default function Home() {
         </LocalizationProvider>
       </aside>
       <article>
-        {/* <table style={tableStyle}>
-          <tr>
-            <th scope='row' style={labelCellStyle}>
-              <div style={labelStyle}></div>
-            </th>
-            <td style={cellStyle}></td>
-          </tr>
-          <tr>
-            <th scope='row' style={labelCellStyle}>
-              <div style={labelStyle}>12:00</div>
-            </th>
-            <td style={cellStyle}></td>
-          </tr>
-          <tr>
-            <th scope='row' style={labelCellStyle}>
-              <div style={labelStyle}>1AM</div>
-            </th>
-            <td style={cellStyle}></td>
-          </tr>
-          <tr>
-            <th scope='row' style={labelCellStyle}>
-              <div style={labelStyle}>2AM</div>
-            </th>
-            <td style={cellStyle}></td>
-          </tr>
-          <tr>
-            <th scope='row' style={labelCellStyle}>
-              <div style={labelStyle}>3AM</div>
-            </th>
-            <td style={cellStyle}></td>
-          </tr>
-        </table> */}
-        {/* <Calendar
-          localizer={localizer}
-          events={event}
-          startAccessor='start'
-          endAccessor='end'
-          style={{ height: 200 }}
-        /> */}
-        <FullCalendar {...calendarOptions} />
+        <button onClick={() => changeView('dayGridMonth')}>
+          Change to Month View
+        </button>
+        <button onClick={() => changeView('timeGridWeek')}>
+          Change to Week View
+        </button>
+        <button onClick={() => changeView('timeGridDay')}>
+          Change to Day View
+        </button>
+        <div style={{ width: '600px', height: '400px' }}>
+          <FullCalendar {...calendarOptions} ref={calendarRef} />
+        </div>
       </article>
     </>
   )
+  
 }
