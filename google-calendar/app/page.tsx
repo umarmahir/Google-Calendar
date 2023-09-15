@@ -11,17 +11,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from '@mui/material'
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -37,20 +27,45 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 const localizer = dayjsLocalizer(dayjs)
-const event = [
-  {
-    id: 1,
-    title: 'Meeting',
-    start: dayjs().hour(10).minute(0).toDate(),
-    end: dayjs().hour(12).minute(0).toDate(),
-  },
-]
 
 export default function Home() {
+  const [date, setDate] = useState<Date | null>(null)
+  const [value, setValue] = useState<Dayjs | null>(dayjs())
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      setDate(calendarRef.current.getApi().getDate())
+    }
+  })
   const calendarRef = useRef<FullCalendar | null>(null)
+
+  const getDate = () => {
+    if (calendarRef.current) {
+      setDate(calendarRef.current.getApi().getDate())
+    }
+  }
+
+  const prevFunc = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().prev()
+    }
+  }
+
+  const nextFunc = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().next()
+    }
+  }
+
+  const todayFunc = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().today()
+    }
+  }
+
   const changeView = (newView: string) => {
     if (calendarRef.current) {
-      calendarRef.current.getApi().changeView(newView) // Use the changeView method
+      calendarRef.current.getApi().changeView(newView)
     }
   }
 
@@ -69,22 +84,12 @@ export default function Home() {
         end: '2023-09-14',
       },
     ],
-    headerToolbar: {},
-    // dayGridWeek: {
-    //   // Customize the hourly grid for dayGridWeek view
-    //   slotDuration: '00:30:00', // Display slots every 30 minutes
-    //   slotLabelInterval: '01:00:00', // Display hour labels every 1 hour
-    // },
-    // dayGridDay: {
-    //   // Customize the hourly grid for dayGridDay view
-      // slotDuration: '00:30:00', // Display slots every 30 minutes
-      // slotLabelInterval: '01:00:00', // Display hour labels every 1 hour
-    },
+    slotDuration: '01:00:00',
+    allDaySlot: false,
+    nowIndicator: true,
+    editable: true,
+    navLinks: true,
   }
-
-  const [value, setValue] = useState<Dayjs | null>(dayjs())
-
-  
 
   const handleDayClick = (date: Dayjs | null) => {
     // setValue(date)
@@ -97,10 +102,12 @@ export default function Home() {
       <div style={{ display: 'flex', alignItems: 'center', flexFlow: 'row' }}>
         <FontAwesomeIcon icon={faBars} />
         <h2 className='normal'>Calendar</h2>
-        <button className='rounded'>Today</button>
-        <FontAwesomeIcon icon={faAngleLeft} />
-        <FontAwesomeIcon icon={faAngleRight} />
-        <h2 className='normal'>Today's Date</h2>
+        <button className='rounded' onClick={todayFunc}>
+          Today
+        </button>
+        <FontAwesomeIcon icon={faAngleLeft} onClick={prevFunc} />
+        <FontAwesomeIcon icon={faAngleRight} onClick={nextFunc} />
+        <h2 className='normal'>{date?.toISOString()}</h2>
         <FontAwesomeIcon icon={faMagnifyingGlass} />
         <div className='drpdn-btn'>
           <FontAwesomeIcon className='help-btn' icon={faCircleQuestion} />
@@ -246,5 +253,4 @@ export default function Home() {
       </article>
     </>
   )
-  
 }
