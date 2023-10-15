@@ -3,12 +3,9 @@
   --fc-today-bg-color: #fff;
 }
 
-/* .today-highlight {
-  background-color: #ffcccb; /
-  color: #ff0000; 
-  font-weight: bold; 
-} */
-
 .fc-toolbar.fc-header-toolbar {
   display: none;
+}
+.fc-daygrid-day-frame .fc-daygrid-day-number {
+  text-align: center !important;
 }

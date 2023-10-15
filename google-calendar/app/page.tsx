@@ -1,5 +1,7 @@
 'use client'
-
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import TextField, { TextFieldProps } from '@mui/material/TextField'
+import Popover from '@mui/material/Popover'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -24,6 +26,8 @@ import {
   faGear,
   faPlus,
   faCheck,
+  faTimes,
+  faClock,
 } from '@fortawesome/free-solid-svg-icons'
 
 const localizer = dayjsLocalizer(dayjs)
@@ -31,19 +35,32 @@ const localizer = dayjsLocalizer(dayjs)
 export default function Home() {
   const [date, setDate] = useState<Date | null>(null)
   const [value, setValue] = useState<Dayjs | null>(dayjs())
-
-  useEffect(() => {
-    if (calendarRef.current) {
-      setDate(calendarRef.current.getApi().getDate())
-    }
-  })
+  const [calendarTitle, setCalendarTitle] = useState<string>('')
+  const [openPopover, setOpenPopover] = useState(false)
   const calendarRef = useRef<FullCalendar | null>(null)
 
-  const getDate = () => {
+  const updateCalendarTitle = () => {
     if (calendarRef.current) {
-      setDate(calendarRef.current.getApi().getDate())
+      const calendarApi = calendarRef.current.getApi()
+      const view = calendarApi.view
+
+      if (view.type === 'timeGridDay') {
+        setCalendarTitle(view.title) // Display date for day view
+      } else if (view.type === 'timeGridWeek' || view.type === 'dayGridMonth') {
+        setCalendarTitle(view.title.replace(/\d{4}-\d{2}-/, '')) // Display month and year for week and month views
+      } else if (view.type === 'dayGridYear') {
+        setCalendarTitle(view.title.replace(/-/, '')) // Display only the year for year view
+      }
     }
   }
+
+  useEffect(() => {
+    updateCalendarTitle()
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi()
+      calendarApi.on('datesSet', updateCalendarTitle) // Subscribe to view change events
+    }
+  }, [])
 
   const prevFunc = () => {
     if (calendarRef.current) {
@@ -69,19 +86,41 @@ export default function Home() {
     }
   }
 
+  const addManualEvent = () => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi()
+
+      const newEvent = {
+        title: 'Add Event',
+        start: '2023-10-13T08:00:00',
+        end: '2023-10-13T09:00:00',
+      }
+
+      calendarApi.addEvent(newEvent)
+    }
+  }
+
+  const handleOpenPopover = () => {
+    setOpenPopover(true)
+  }
+
+  const handleClosePopover = () => {
+    setOpenPopover(false)
+  }
+
   const calendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin, dayGridPlugin],
     initialView: 'timeGridWeek',
     events: [
       {
         title: 'Event 1',
-        start: '2023-09-13',
-        end: '2023-09-13',
+        start: '2023-10-11T08:00:00',
+        end: '2023-10-11T08:30:00',
       },
       {
         title: 'Event 2',
-        start: '2023-09-14',
-        end: '2023-09-14',
+        start: '2023-10-12T09:00:00',
+        end: '2023-10-12T10:00:00',
       },
     ],
     slotDuration: '01:00:00',
@@ -107,7 +146,7 @@ export default function Home() {
         </button>
         <FontAwesomeIcon icon={faAngleLeft} onClick={prevFunc} />
         <FontAwesomeIcon icon={faAngleRight} onClick={nextFunc} />
-        <h2 className='normal'>{date?.toISOString()}</h2>
+        <h2 className='normal'>{calendarTitle}</h2>
         <FontAwesomeIcon icon={faMagnifyingGlass} />
         <div className='drpdn-btn'>
           <FontAwesomeIcon className='help-btn' icon={faCircleQuestion} />
@@ -247,8 +286,50 @@ export default function Home() {
         <button onClick={() => changeView('timeGridDay')}>
           Change to Day View
         </button>
+        <button onClick={addManualEvent}>Add Event</button>
+        <button onClick={handleOpenPopover}>Open popover</button>
+        <Popover
+          open={openPopover}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: 'center',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'center',
+            horizontal: 'center',
+          }}
+        >
+          <FontAwesomeIcon icon={faTimes} onClick={handleClosePopover} />
+          <TextField
+            id='standard-basic'
+            placeholder='Add Title'
+            variant='standard'
+          />
+
+          <h2>Event</h2>
+          <h2>Task</h2>
+          <h2>Appointment Schedule</h2>
+          <div>
+            <FontAwesomeIcon icon={faClock} />
+            <DatePicker
+              renderInput={(params: TextFieldProps) => (
+                <TextField
+                  {...params}
+                  InputProps={{ ...params.InputProps, endAdornment: null }}
+                />
+              )}
+              inputFormat='EEEE, MMMM d'
+              // other props
+            />
+          </div>
+        </Popover>
         <div style={{ width: '600px', height: '400px' }}>
-          <FullCalendar {...calendarOptions} ref={calendarRef} />
+          <FullCalendar
+            {...calendarOptions}
+            ref={calendarRef}
+            dateClick={addManualEvent}
+          />
         </div>
       </article>
     </>
